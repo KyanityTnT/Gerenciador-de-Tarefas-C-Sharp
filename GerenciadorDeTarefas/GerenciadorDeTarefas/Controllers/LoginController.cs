@@ -1,4 +1,6 @@
 ﻿using GerenciadorDeTarefas.Dtos;
+using GerenciadorDeTarefas.Models;
+using GerenciadorDeTarefas.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -14,8 +16,11 @@ namespace GerenciadorDeTarefas.Controllers
     [Route("api/[controller]")]
     public class LoginController : ControllerBase
     {
-
+        
         private readonly ILogger<LoginController> _logger;
+
+        private readonly string loginTeste = "admin@admin.com";
+        private readonly string senhaTeste = "admin1234@";
         public LoginController(ILogger<LoginController> logger)
         {
             _logger = logger;
@@ -26,7 +31,10 @@ namespace GerenciadorDeTarefas.Controllers
         {
             try
             {
-                if(requisicao == null || requisicao.Login == null || requisicao.Senha == null)
+                if(requisicao == null 
+                    || string.IsNullOrEmpty(requisicao.Login) || string.IsNullOrWhiteSpace(requisicao.Login)
+                    || string.IsNullOrEmpty(requisicao.Senha) || string.IsNullOrWhiteSpace(requisicao.Senha)
+                    || requisicao.Login != loginTeste || requisicao.Senha != senhaTeste)
                 {
                     return BadRequest(new ErroRespostaDto()
                     {
@@ -35,11 +43,26 @@ namespace GerenciadorDeTarefas.Controllers
                     });
                 }
 
-                return Ok("usuário autenticado com sucesso");
+                var usuarioTeste = new Usuario()
+                {
+                    Id = 1,
+                    Nome = "Usuário de Teste",
+                    Email = loginTeste,
+                    Senha = senhaTeste
+                };
+
+                var token = TokenService.CriarToken(usuarioTeste);
+
+                return Ok(new LoginRespostaDto() 
+                {
+                    Email = usuarioTeste.Email,
+                    Nome = usuarioTeste.Nome,
+                    Token = token
+                });
             }
             catch (Exception e)
             {
-                _logger.LogError($"Ocurreu erro a efetuar login:{ e.Message}", e);
+                _logger.LogError($"Ocorreu erro a efetuar login:{ e.Message}", e);
                 return StatusCode(StatusCodes.Status500InternalServerError, new ErroRespostaDto()
                 {
                     Status = StatusCodes.Status500InternalServerError,
