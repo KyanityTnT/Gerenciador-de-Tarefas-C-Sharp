@@ -7,6 +7,6 @@ namespace GerenciadorDeTarefas
 {
     public class ChaveJWT
     {
-        public static string ChaveSecreta = "Inazuma22";
+        public static string ChaveSecreta = "MinhaSenhaSecretaeBoladonaDemais";
     }
 }
